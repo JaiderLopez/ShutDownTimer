@@ -5,6 +5,7 @@ from flet import Icon, Icons, Theme
 from flet import border, border_radius, alignment, MainAxisAlignment, CrossAxisAlignment
 import time
 import os
+import sys
 
 class Controls(Container):
    def __init__(self, num_control, funtion, icon):
@@ -123,7 +124,7 @@ class App(Container):
       self.page.window.min_height = 155
       self.page.theme_mode = 'dark'
       self.page.fonts = {
-         'digit' : r"assets\DS-DIGI.TTF"
+         'digit' : self.resource_path("assets/DS-DIGI.TTF")
       }
       self.page.theme = Theme(font_family= 'digit')
       self.page.padding = 0
@@ -134,6 +135,11 @@ class App(Container):
       ))
  
 # ---------------------------------------- FUNCIONES ----------------------------------------
+   def resource_path(self, relative_path):
+      if hasattr(sys, "_MEIPASS"):
+         return os.path.join(sys._MEIPASS, relative_path)
+      return os.path.abspath(relative_path)
+   
    def change(self,):
       self.pause = not self.pause
       self.btn_pause.visible = not self.btn_pause.visible
@@ -145,7 +151,7 @@ class App(Container):
 
    def pause_or_continue(self, e):
       if self.btn_pause.text == "Continue":
-         self.btn_pause.text == "Pause"
+         self.btn_pause.text = "Pause"
       self.change()
       self.page.update()
 
@@ -186,14 +192,15 @@ class App(Container):
             self.page.update()
             time.sleep(1)
             os.system("shutdown /h")
+            # print("Sleeping")
          elif control == 'power':
             os.system("shutdown /s")
-            # print("No no No")
+            # print("Power out")
  
 def main(page: Page):
    app = App(page)
    app.build()
  
 if __name__ == '__main__':
-   app(target = main)
+   app(target = main, assets_dir= 'assets')
 
