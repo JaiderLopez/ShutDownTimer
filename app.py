@@ -6,39 +6,22 @@ from flet import border, border_radius, alignment, MainAxisAlignment, CrossAxisA
 import time
 import os
 
-class ControlsUp(Container):
-   def __init__(self, num_control):
+class Controls(Container):
+   def __init__(self, num_control, funtion, icon):
       super().__init__(expand= True, expand_loose= True)
-      self.content = Icon(name= Icons.ARROW_DROP_UP, size= 16)
+      self.content = Icon(name= icon, size= 16)
+      self.funtion = funtion
       self.num_control = num_control
       self.width = 50
       self.height = 20
       self.bgcolor = "black" 
       self.border_radius = border_radius.only(top_left= 5, top_right= 5)
       
-      self.on_click = self.up_num
+      self.on_click = self.add_or_remove
    
-   def up_num(self, e):
-      self.num_control.update_num(self.num_control.texto+1)
+   def add_or_remove(self, e):
+      self.num_control.update_num(self.num_control.texto + self.funtion)
       self.page.update()
-      
-      
-class ControlsDown(Container):
-   def __init__(self, num_control):
-      super().__init__(expand= True, expand_loose= True)
-      self.content = Icon(name= Icons.ARROW_DROP_DOWN, size= 16)
-      self.num_control = num_control
-      self.width = 50
-      self.height = 20
-      self.bgcolor = "black"
-      self.border_radius = border_radius.only(bottom_left=  5, bottom_right= 5)
-
-      self.on_click = self.down_num
-   
-   def down_num(self, e):
-      self.num_control.update_num(self.num_control.texto-1)
-      self.page.update()
-      
 
 class Boton(Container):
    def __init__(self, texto: int):
@@ -53,12 +36,9 @@ class Boton(Container):
       self.border = border.all(1, 'black')
       self.update_num(self.texto)
       
-      
    def update_num(self, numero):
       self.texto = numero
       if self.texto != ':':
-         # if self.texto < 0:
-         #    self.texto = 0
          self.texto %= 60
 
          if self.texto < 10:
@@ -79,17 +59,25 @@ class App(Container):
       self.minutes = 0
       self.seconds = 0
       self.pause = True
+      
+      # TIMER CONTAINERS
       self.hour_num = Boton(self.hours)
       self.minute_num = Boton(self.minutes)
       self.second_num = Boton(self.seconds)
+      
+      # TIMER BUTTONS
       self.btn_pause = Button('Pause', on_click= self.pause_or_continue, visible= False)
       self.btn_sleep = Button('Sleep', on_click= self.timer, data= 'sleep', disabled= False)
       self.btn_power = Button('Power', on_click= self.timer, data= 'power', disabled= False)
+      
+      # CONTROLS BUTTONS
       self.contrlos_up = []
       self.contrlos_down = []
       for timer in [self.hour_num, self.minute_num, self.second_num]:
-         self.contrlos_up.append(ControlsUp(timer))
-         self.contrlos_down.append(ControlsDown(timer))
+         self.contrlos_up.append(Controls(timer, 1, Icons.ARROW_DROP_UP))
+         self.contrlos_down.append(Controls(timer, -1, Icons.ARROW_DROP_DOWN))
+
+      # CONTROLS VIEW
       self.controls_list = Container(content= Row(
          spacing= 0,
          controls=[
@@ -123,9 +111,6 @@ class App(Container):
       border_radius= 10,
       )
 
-      
-
- 
 # ---------------------------------------- VENTANA ---------------------------------------- 
    def build(self):
       self.page.window_maximizable = False
@@ -163,6 +148,7 @@ class App(Container):
          self.btn_pause.text == "Pause"
       self.change()
       self.page.update()
+
    def clock(self):
       horas = self.hour_num.texto 
       minutos = self.minute_num.texto
@@ -170,7 +156,7 @@ class App(Container):
       while horas > 0 or minutos > 0 or segundos > 0:
          if self.pause:
             break
-         print(f"{horas:02}:{minutos:02}:{segundos:02}")
+         # print(f"{horas:02}:{minutos:02}:{segundos:02}")
          time.sleep(1)
          if segundos > 0:
             segundos -= 1
@@ -201,8 +187,8 @@ class App(Container):
             time.sleep(1)
             os.system("shutdown /h")
          elif control == 'power':
-            # os.system("shutdown /s /t 1")
-            print("No no No")
+            os.system("shutdown /s")
+            # print("No no No")
  
 def main(page: Page):
    app = App(page)
@@ -210,5 +196,4 @@ def main(page: Page):
  
 if __name__ == '__main__':
    app(target = main)
-
 
